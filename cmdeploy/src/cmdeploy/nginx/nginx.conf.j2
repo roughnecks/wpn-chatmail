@@ -27,8 +27,7 @@ http {
 
 	server {
 		listen 443 ssl default_server;
-		listen [::]:443 ssl default_server;
-
+  
 		root /var/www/html;
 
 		index index.html index.htm;
@@ -79,7 +78,6 @@ http {
 	# Redirect www. to non-www
 	server {
 		listen 443 ssl;
-		listen [::]:443 ssl;
 		server_name www.{{ config.domain_name }};
 		return 301 $scheme://{{ config.domain_name }}$request_uri;
 		access_log syslog:server=unix:/dev/log,facility=local7;
