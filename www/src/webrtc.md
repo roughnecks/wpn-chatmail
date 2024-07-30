@@ -57,5 +57,11 @@ da Delta Chat in modo automatico
 
 [![](https://chatmail.woodpeckersnest.space/webrtc_brie.png)](DCWEBRTC:https://brie.fi/ng/$ROOM)
 
+📲 **Usually**
+
+`Usually`
+
+[![](https://chatmail.woodpeckersnest.space/webrtc_usually.png)](DCWEBRTC:https://usually.in/ng/$ROOM)
+
 
 💡 **Se hai domande** scrivici all'e-mail: `chatmail \[at\] woodpeckersnest \[dot\] space`
