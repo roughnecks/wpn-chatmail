@@ -1,261 +1,258 @@
 
-# Privacy Policy for {{ config.mail_domain }} 
+# Informativa sulla riservatezza per {{ config.mail_domain }}
 
 {% if config.mail_domain == "nine.testrun.org" %}
-Welcome to `{{config.mail_domain}}`, the default chatmail onboarding server for Delta Chat users. 
-It is operated on the side by a small sysops team employed by [merlinux](https://merlinux.eu),
-an open-source R&D company also acting as the fiscal sponsor of Delta Chat app developments. 
-See [other chatmail servers](https://delta.chat/en/chatmail) for alternative server operators. 
+Benvenuto in `{{config.mail_domain}}`, il server d'imbarco Chatmail italiano per gli utenti Delta Chat.
+È gestito da un piccolo team di volontari raggiungibili all'indirizzo: chatmail@woodpeckersnest.space
 {% endif %}
 
 
-## Summary: No personal data asked or collected 
+## Riepilogo: nessun dato personale richiesto o raccolto
 
-This chatmail server neither asks for nor retains personal information. 
-Chatmail servers exist to reliably transmit (store and deliver) end-to-end encrypted messages
-between user's devices running the Delta Chat messenger app. 
-Technically, you may think of a Chatmail server as 
-an end-to-end encrypted "messaging router" at Internet-scale. 
+Questo server di Chatmail non richiede né conserva informazioni personali.
+I server di chatmail esistono per trasmettere (archiviare e consegnare) in modo affidabile messaggi crittografati end-to-end
+tra i dispositivi dell'utente che eseguono l'app di messaggistica Delta Chat.
+Tecnicamente, potresti pensare a un server Chatmail come
+un "router di messaggistica" crittografato end-to-end su scala Internet.
 
-A chatmail server is very unlike classic e-mail servers (for example Google Mail servers)
-that ask for personal data and permanently store messages. 
-A chatmail server behaves more like the Signal messaging server 
-but does not know about phone numbers and securely and automatically interoperates 
-with other chatmail and classic e-mail servers. 
+Un server di chatmail è molto diverso dai classici server di posta elettronica (ad esempio i server di posta di Google)
+che richiedono dati personali e memorizzano permanentemente i messaggi.
+Un server di chatmail si comporta più come il server di messaggistica Signal
+ma non conosce i numeri di telefono e interopera in modo sicuro e automatico
+con altri chatmail e server di posta elettronica classici.
 
-In particular, this chatmail server 
+In particolare, questo server di Chatmail
 
-- unconditionally removes messages after {{ config.delete_mails_after }} days,
+- rimuove incondizionatamente i messaggi dopo {{ config.delete_mails_after }} giorni,
 
-- prohibits sending out un-encrypted messages,
+- vieta l'invio di messaggi non crittografati,
 
-- only has temporary log files used for debugging purposes.
+- contiene solo file di registro temporanei utilizzati per scopi di debug.
 
-Legally, authorities might still regard chatmail as a "classic e-mail" server
-which collects and retains personal data. 
-We do not agree on this interpretation. Nevertheless, we provide more legal details below
-to make life easier for data protection specialists and lawyers scrutinizing chatmail operations. 
+Legalmente, le autorità potrebbero ancora considerare la Chatmail come un "classico server e-mail".
+che raccoglie e conserva i dati personali.
+Non siamo d'accordo su questa interpretazione. Tuttavia, forniamo ulteriori dettagli legali di seguito
+per semplificare la vita agli specialisti della protezione dei dati e agli avvocati che controllano le operazioni di Chatmail.
 
 
-## 1. Name and contact information 
+## 1. Nome e informazioni di contatto
 
-Responsible for the processing of your personal data is:
+Responsabile del trattamento dei Suoi dati personali è:
 ```
 {{ config.privacy_postal }}
 ```
 
 E-mail: {{ config.privacy_mail }}
 
-We have appointed a data protection officer:
+Abbiamo nominato un responsabile della protezione dei dati:
 
 ```
 {{ config.privacy_pdo }}
 ```
 
-## 2. Processing when using chat e-mail services
+##2. Trattamento in caso di utilizzo dei servizi e-mail in chat
 
-We provide e-mail services optimized for the use from [Delta Chat](https://delta.chat) apps 
-and process only the data necessary
-for the setup and technical execution of the e-mail dispatch.
-The purpose of the processing is to
-read, write, manage, delete, send, and receive emails.
-For this purpose,
-we operate server-side software
-that enables us to send and receive e-mail messages.
-Allowing the use of the e-mail service,
-we process the following data and details:
+Forniamo servizi e-mail ottimizzati per l'uso dall'app [Delta Chat](https://delta.chat).
+ed elaborare solo i dati necessari
+per l'impostazione e l'esecuzione tecnica dell'invio di e-mail.
+Lo scopo del trattamento è quello di
+leggere, scrivere, gestire, eliminare, inviare e ricevere e-mail.
+Per questo scopo,
+gestiamo software lato server
+che ci consente di inviare e ricevere messaggi e-mail.
+Consentire l'utilizzo del servizio e-mail,
+trattiamo i seguenti dati e dettagli:
 
-- Outgoing and incoming messages (SMTP) are stored for transit 
-  on behalf of their users until the message can be delivered.
+- I messaggi in uscita e in entrata (SMTP) vengono archiviati per il transito
+ per conto dei loro utenti fino a quando il messaggio non può essere recapitato.
 
-- E-Mail-Messages are stored for the recipient and made accessible via IMAP protocols,
-  until explicitly deleted by the user or until a fixed time period is exceeded,
-  (*usually 4-8 weeks*).
+- I messaggi e-mail vengono archiviati per il destinatario e resi accessibili tramite protocolli IMAP,
+ fino alla cancellazione esplicita da parte dell'utente o fino al superamento di un periodo di tempo stabilito,
+ (*normalmente 4-8 settimane*).
 
-- IMAP and SMTP protocols are password protected with unique credentials for each account.
+- I protocolli IMAP e SMTP sono protetti da password con credenziali univoche per ciascun account.
 
-- Users can retrieve or delete all stored messages 
-  without intervention from the operators using standard IMAP client tools.
+- Gli utenti possono recuperare o eliminare tutti i messaggi memorizzati
+ senza intervento da parte degli operatori che utilizzano strumenti client IMAP standard.
 
-### 2.1 Account setup
+### 3.1 Configurazione dell'account
 
-Creating an account happens in one of two ways on our mail servers: 
+La creazione di un account avviene in due modi sui nostri server di posta:
 
-- with a QR invitation token 
-  which is scanned using the Delta Chat app
-  and then the account is created.
+- con un token di invito QR
+ che viene scansionato utilizzando l'app Delta Chat
+ e quindi l'account viene creato.
 
-- by letting Delta Chat otherwise create an account 
-  and register it with a {{ config.mail_domain }} mail server. 
+- consentendo a Delta Chat di creare altrimenti un account
+ e registralo con un server di posta {{ config.mail_domain }}.
 
-In either case, we process the newly created email address.
-No phone numbers,
-other email addresses,
-or other identifiable data
-is currently required.
-The legal basis for the processing is
-Art. 6 (1) lit. b GDPR,
-as you have a usage contract with us
-by using our services.
+In entrambi i casi, elaboriamo l'indirizzo e-mail appena creato.
+Nessun numero di telefono,
+altri indirizzi e-mail,
+o altri dati identificabili
+è attualmente richiesto.
+La base giuridica del trattamento è
+Art. 6 (1) lett. b GDPR,
+poiché hai un contratto di utilizzo con noi
+utilizzando i nostri servizi.
 
-### 2.2 Processing of E-Mail-Messages
+## 3.2 Elaborazione dei Messaggi E-Mail
 
-In addition,
-we will process data
-to keep the server infrastructure operational
-for purposes of e-mail dispatch
-and abuse prevention.
+Inoltre,
+tratteremo i dati
+per mantenere operativa l’infrastruttura del server
+ai fini dell'invio di e-mail
+e prevenzione degli abusi.
 
-- Therefore,
-  it is necessary to process the content and/or metadata
-  (e.g., headers of the email as well as smtp chatter)
-  of E-Mail-Messages in transit. 
+- Perciò,
+ è necessario elaborare il contenuto e/o i metadati
+ (ad esempio, intestazioni dell'e-mail e messaggi SMTP)
+ di messaggi e-mail in transito.
 
-- We will keep logs of messages in transit for a limited time.
-  These logs are used to debug delivery problems and software bugs.
+- Conserveremo i registri dei messaggi in transito per un periodo limitato.
+ Questi registri vengono utilizzati per eseguire il debug di problemi di consegna e bug del software.
 
-In addition,
-we process data to protect the systems from excessive use.
-Therefore, limits are enforced:
+Inoltre,
+elaboriamo i dati per proteggere i sistemi da un uso eccessivo.
+Pertanto vengono applicati dei limiti:
 
-- rate limits
+- limiti d'invio
 
-- storage limits
+- limiti di conservazione
 
-- message size limits
+- limiti di dimensione dei messaggi
 
-- any other limit necessary for the whole server to function in a healthy way
-  and to prevent abuse.
+- qualsiasi altro limite necessario affinché l'intero server funzioni in modo corretto
+ e per prevenire gli abusi.
 
-The processing and use of the above permissions
-are performed to provide the service.
-The data processing is necessary for the use of our services,
-therefore the legal basis of the processing is
-Art. 6 (1) lit. b GDPR,
-as you have a usage contract with us
-by using our services.
-The legal basis for the data processing
-for the purposes of security and abuse prevention is
-Art. 6 (1) lit. f GDPR.
-Our legitimate interest results
-from the aforementioned purposes.
-We will not use the collected data
-for the purpose of drawing conclusions
-about your person.
-
-
-## 3. Processing when using our Website
-
-When you visit our website,
-the browser used on your end device
-automatically sends information to the server of our website.
-This information is temporarily stored in a so-called log file.
-The following information is collected and stored
-until it is automatically deleted
-(*usually 7 days*):
-
-- used type of browser,
-
-- used operating system, 
-
-- access date and time as well as
-
-- country of origin and IP address, 
-
-- the requested file name or HTTP resource,
-
-- the amount of data transferred,
-
-- the access status (file transferred, file not found, etc.) and
-
-- the page from which the file was requested.
-
-This website is hosted by an external service provider (hoster).
-The personal data collected on this website is stored
-on the hoster's servers.
-Our hoster will process your data
-only to the extent necessary to fulfill its obligations
-to perform under our instructions.
-In order to ensure data protection-compliant processing,
-we have concluded a data processing agreement with our hoster.
-
-The aforementioned data is processed by us for the following purposes:  
-
-- Ensuring a reliable connection setup of the website,
-
-- ensuring a convenient use of our website,
-
-- checking and ensuring system security and stability, and
-
-- for other administrative purposes.
-
-The legal basis for the data processing is
-Art. 6 (1) lit. f GDPR.
-Our legitimate interest results
-from the aforementioned purposes of data collection.
-We will not use the collected data
-for the purpose of drawing conclusions about your person.
-
-## 4. Transfer of Data
-
-We do not retain any personal data but e-mail messages waiting to be delivered 
-may contain personal data.
-Any such residual personal data will not be transferred to third parties
-for purposes other than those listed below:
-
-a) you have given your express consent
-in accordance with Art. 6 para. 1 sentence 1 lit. a GDPR,  
-
-b) the disclosure is necessary for the assertion, exercise or defence of legal claims
-pursuant to Art. 6 (1) sentence 1 lit. f GDPR
-and there is no reason to assume that you have
-an overriding interest worthy of protection
-in the non-disclosure of your data,  
-
-c) in the event that there is a legal obligation to disclose your data
-pursuant to Art. 6 para. 1 sentence 1 lit. c GDPR,
-as well as  
-
-d) this is legally permissible and necessary
-in accordance with Art. 6 Para. 1 S. 1 lit. b GDPR
-for the processing of contractual relationships with you,  
-
-e) this is carried out by a service provider
-acting on our behalf and on our exclusive instructions,
-whom we have carefully selected (Art. 28 (1) GDPR)
-and with whom we have concluded a corresponding contract on commissioned processing (Art. 28 (3) GDPR),
-which obliges our contractor,
-among other things,
-to implement appropriate security measures
-and grants us comprehensive control powers.
-
-## 5. Rights of the data subject
-
-The rights arise from Articles 12 to 23 GDPR.
-Since no personal data is stored on our servers,
-even in encrypted form,
-there is no need to provide information
-on these or possible objections.
-A deletion can be made
-directly in the Delta Chat email messenger.
-
-If you have any questions or complaints, 
-please feel free to contact us by email:  
-{{ config.privacy_mail }}
-
-As a rule, you can contact the supervisory authority of your usual place of residence
-or workplace
-or our registered office for this purpose.
-The supervisory authority responsible for our place of business
-is the `{{ config.privacy_supervisor }}`.
+Il trattamento e l'utilizzo delle autorizzazioni di cui sopra
+vengono eseguiti per fornire il servizio.
+Il trattamento dei dati è necessario per la fruizione dei nostri servizi,
+pertanto la base giuridica del trattamento è
+Art. 6 (1) lett. b GDPR,
+poiché hai un contratto di utilizzo con noi
+utilizzando i nostri servizi.
+La base giuridica del trattamento dei dati
+ai fini della sicurezza e della prevenzione degli abusi
+Art. 6 (1) lett. f GDPR.
+Ne risulta il nostro interesse legittimo
+dalle finalità sopra indicate.
+Non utilizzeremo i dati raccolti
+allo scopo di trarre conclusioni
+sulla tua persona.
 
 
-## 6. Validity of this privacy policy 
+## 3. Trattamento durante l'utilizzo del nostro sito web
 
-This data protection declaration is valid
-as of *December 2023*.
-Due to the further development of our service and offers
-or due to changed legal or official requirements,
-it may become necessary to revise this data protection declaration from time to time.
+Quando visiti il ​​nostro sito web,
+il browser utilizzato sul tuo dispositivo finale
+invia automaticamente informazioni al server del nostro sito web.
+Queste informazioni vengono temporaneamente memorizzate in un cosiddetto file di registro.
+Le seguenti informazioni vengono raccolte e archiviate
+fino a quando non verrà automaticamente eliminato
+(*solitamente 7 giorni*):
 
+- tipo di browser utilizzato,
+
+- sistema operativo utilizzato,
+
+- data e ora di accesso nonché
+
+- paese di origine e indirizzo IP,
+
+- il nome del file richiesto o la risorsa HTTP,
+
+- la quantità di dati trasferiti,
+
+- lo stato di accesso (file trasferito, file non trovato, ecc.) e
+
+- la pagina da cui è stato richiesto il file.
+
+Questo sito web è ospitato da un fornitore di servizi esterno (hoster).
+I dati personali raccolti su questo sito web vengono archiviati
+sui server dell'hoster.
+Il nostro hoster tratterà i tuoi dati
+solo nella misura necessaria per adempiere ai propri obblighi
+eseguire secondo le nostre istruzioni.
+Al fine di garantire un trattamento conforme alla protezione dei dati,
+abbiamo concluso un accordo sul trattamento dei dati con il nostro hoster.
+
+I suddetti dati vengono da noi trattati per le seguenti finalità:
+
+- garantire una configurazione affidabile della connessione del sito web,
+
+- garantire un uso conveniente del nostro sito web,
+
+- verificare e garantire la sicurezza e la stabilità del sistema, e
+
+- per altri scopi amministrativi.
+
+La base giuridica del trattamento dei dati è
+Art. 6 (1) lett. f GDPR.
+Ne risulta il nostro interesse legittimo
+dalle finalità di raccolta dei dati sopra indicate.
+Non utilizzeremo i dati raccolti
+allo scopo di trarre conclusioni sulla tua persona.
+
+## 4. Trasferimento dei dati
+
+Non conserviamo alcun dato personale ma messaggi e-mail in attesa di essere recapitati
+possono contenere dati personali.
+Eventuali dati personali residui non verranno ceduti a terzi
+per finalità diverse da quelle di seguito elencate:
+
+a) hai prestato il tuo consenso espresso
+ai sensi dell'art. 6 par. 1 frase 1 lett. a GDPR,
+
+b) la comunicazione è necessaria per far valere, esercitare o difendere un diritto in sede giudiziaria
+ai sensi dell'art. 6 cpv. 1 frase 1 lett. f GDPR
+e non c'è motivo di presumere che tu lo abbia fatto
+un interesse preminente degno di tutela
+nella mancata diffusione dei tuoi dati,
+
+c) nel caso in cui sussista un obbligo legale di comunicare i tuoi dati
+ai sensi dell'art. 6 par. 1 frase 1 lett. c GDPR,
+così come
+
+d) ciò è legalmente consentito e necessario
+ai sensi dell'art. 6 par. 1 S. 1 lett. b GDPR
+per l'elaborazione dei rapporti contrattuali con voi,
+
+e) ciò viene effettuato da un fornitore di servizi
+agendo per nostro conto e dietro nostre esclusive istruzioni,
+da noi accuratamente selezionati (Art. 28(1) GDPR)
+e con i quali abbiamo concluso un corrispondente contratto di trattamento su incarico (art. 28 par. 3 GDPR),
+che obbliga il nostro appaltatore,
+tra le altre cose,
+per attuare adeguate misure di sicurezza
+e ci concede ampi poteri di controllo.
+
+## 5. Diritti dell'interessato
+
+I diritti nascono dagli articoli da 12 a 23 GDPR.
+Poiché sui nostri server non vengono archiviati dati personali,
+anche in forma criptata,
+non è necessario fornire informazioni
+su queste o possibili obiezioni.
+È possibile effettuare una cancellazione
+direttamente nel messenger e-mail Delta Chat.
+
+Se avete domande o reclami,
+non esitate a contattarci via e-mail:
+{{config.privacy_mail}}
+
+Di norma potete rivolgervi all’autorità di vigilanza del vostro luogo di residenza abituale
+o posto di lavoro
+o la nostra sede legale a questo scopo.
+L’autorità di vigilanza competente per la nostra sede di attività
+è il `{{ config.privacy_supervisor }}`.
+
+
+## 6. Validità della presente informativa sulla privacy
+
+La presente dichiarazione sulla protezione dei dati è valida
+a partire da *Maggio 2024*.
+A causa dell'ulteriore sviluppo del nostro servizio e delle nostre offerte
+o a causa di modifiche dei requisiti legali o ufficiali,
+potrebbe essere necessario rivedere di tanto in tanto la presente dichiarazione sulla protezione dei dati.
 
