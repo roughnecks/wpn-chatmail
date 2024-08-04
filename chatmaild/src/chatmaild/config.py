@@ -1,9 +1,17 @@
+from pathlib import Path
+
 import iniconfig
+
+from chatmaild.user import User
+
+echobot_password_path = Path("/run/echobot/password")
 
 
 def read_config(inipath):
+    assert Path(inipath).exists(), inipath
     cfg = iniconfig.IniConfig(inipath)
-    return Config(inipath, params=cfg.sections["params"])
+    params = cfg.sections["params"]
+    return Config(inipath, params=params)
 
 
 class Config:
@@ -12,7 +20,9 @@ class Config:
         self.mail_domain = params["mail_domain"]
         self.max_user_send_per_minute = int(params["max_user_send_per_minute"])
         self.max_mailbox_size = params["max_mailbox_size"]
+        self.max_message_size = int(params.get("max_message_size", "31457280"))
         self.delete_mails_after = params["delete_mails_after"]
+        self.delete_inactive_users_after = int(params["delete_inactive_users_after"])
         self.username_min_length = int(params["username_min_length"])
         self.username_max_length = int(params["username_max_length"])
         self.password_min_length = int(params["password_min_length"])
@@ -20,23 +30,64 @@ class Config:
         self.passthrough_recipients = params["passthrough_recipients"].split()
         self.filtermail_smtp_port = int(params["filtermail_smtp_port"])
         self.postfix_reinject_port = int(params["postfix_reinject_port"])
+        self.disable_ipv6 = params.get("disable_ipv6", "false").lower() == "true"
+        self.imap_rawlog = params.get("imap_rawlog", "false").lower() == "true"
         self.iroh_relay = params.get("iroh_relay")
         self.privacy_postal = params.get("privacy_postal")
         self.privacy_mail = params.get("privacy_mail")
         self.privacy_pdo = params.get("privacy_pdo")
         self.privacy_supervisor = params.get("privacy_supervisor")
 
+        # deprecated option
+        mbdir = params.get("mailboxes_dir", f"/home/vmail/mail/{self.mail_domain}")
+        self.mailboxes_dir = Path(mbdir.strip())
+
+        # old unused option (except for first migration from sqlite to maildir store)
+        self.passdb_path = Path(params.get("passdb_path", "/home/vmail/passdb.sqlite"))
+
     def _getbytefile(self):
         return open(self._inipath, "rb")
 
+    def get_user(self, addr):
+        if not addr or "@" not in addr or "/" in addr:
+            raise ValueError(f"invalid address {addr!r}")
 
-def write_initial_config(inipath, mail_domain):
+        maildir = self.mailboxes_dir.joinpath(addr)
+        if addr.startswith("echo@"):
+            password_path = echobot_password_path
+        else:
+            password_path = maildir.joinpath("password")
+
+        return User(maildir, addr, password_path, uid="vmail", gid="vmail")
+
+
+def write_initial_config(inipath, mail_domain, overrides):
+    """Write out default config file, using the specified config value overrides."""
     from importlib.resources import files
 
     inidir = files(__package__).joinpath("ini")
-    content = (
-        inidir.joinpath("chatmail.ini.f").read_text().format(mail_domain=mail_domain)
-    )
+    source_inipath = inidir.joinpath("chatmail.ini.f")
+    content = source_inipath.read_text().format(mail_domain=mail_domain)
+
+    # apply config overrides
+    new_lines = []
+    extra = overrides.copy()
+    for line in content.split("\n"):
+        new_line = line.strip()
+        if new_line and new_line[0] not in "#[":
+            name, value = map(str.strip, new_line.split("=", maxsplit=1))
+            value = extra.pop(name, value)
+            new_line = f"{name} = {value}"
+        new_lines.append(new_line)
+
+    for name, value in extra.items():
+        new_line = f"{name} = {value}"
+        new_lines.append(new_line)
+
+    content = "\n".join(new_lines)
+
+    # apply testrun privacy overrides
+
     if mail_domain.endswith(".testrun.org"):
         override_inipath = inidir.joinpath("override-testrun.ini")
         privacy = iniconfig.IniConfig(override_inipath)["privacy"]

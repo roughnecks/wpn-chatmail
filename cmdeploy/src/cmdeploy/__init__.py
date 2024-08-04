@@ -92,7 +92,7 @@ def _install_remote_venv_with_chatmaild(config) -> None:
         group="root",
         mode="644",
         config={
-            "mail_domain": config.mail_domain,
+            "mailboxes_dir": config.mailboxes_dir,
             "execpath": f"{remote_venv_dir}/bin/chatmail-metrics",
         },
     )
@@ -103,6 +103,7 @@ def _install_remote_venv_with_chatmaild(config) -> None:
         "filtermail",
         "echobot",
         "chatmail-metadata",
+        "lastlogin",
     ):
         params = dict(
             execpath=f"{remote_venv_dir}/bin/{fn}",
@@ -267,6 +268,7 @@ def _configure_postfix(config: Config, debug: bool = False) -> bool:
         group="root",
         mode="644",
         config=config,
+        disable_ipv6=config.disable_ipv6,
     )
     need_restart |= main_config.changed
 
@@ -317,6 +319,7 @@ def _configure_dovecot(config: Config, debug: bool = False) -> bool:
         mode="644",
         config=config,
         debug=debug,
+        disable_ipv6=config.disable_ipv6,
     )
     need_restart |= main_config.changed
     auth_config = files.put(
@@ -337,20 +340,6 @@ def _configure_dovecot(config: Config, debug: bool = False) -> bool:
         mode="644",
     )
     need_restart |= lua_push_notification_script.changed
-
-    sieve_script = files.put(
-        src=importlib.resources.files(__package__).joinpath("dovecot/default.sieve"),
-        dest="/etc/dovecot/default.sieve",
-        user="root",
-        group="root",
-        mode="644",
-    )
-    need_restart |= sieve_script.changed
-    if sieve_script.changed:
-        server.shell(
-            name="compile sieve script",
-            commands=["/usr/bin/sievec /etc/dovecot/default.sieve"],
-        )
 
     files.template(
         src=importlib.resources.files(__package__).joinpath("dovecot/expunge.cron.j2"),
@@ -375,7 +364,7 @@ def _configure_dovecot(config: Config, debug: bool = False) -> bool:
     return need_restart
 
 
-def _configure_nginx(domain: str, debug: bool = False) -> bool:
+def _configure_nginx(config: Config, debug: bool = False) -> bool:
     """Configures nginx HTTP server."""
     need_restart = False
 
@@ -385,7 +374,8 @@ def _configure_nginx(domain: str, debug: bool = False) -> bool:
         user="root",
         group="root",
         mode="644",
-        config={"domain_name": domain},
+        config={"domain_name": config.mail_domain},
+        disable_ipv6=config.disable_ipv6,
     )
     need_restart |= main_config.changed
 
@@ -395,7 +385,7 @@ def _configure_nginx(domain: str, debug: bool = False) -> bool:
         user="root",
         group="root",
         mode="644",
-        config={"domain_name": domain},
+        config={"domain_name": config.mail_domain},
     )
     need_restart |= autoconfig.changed
 
@@ -405,7 +395,7 @@ def _configure_nginx(domain: str, debug: bool = False) -> bool:
         user="root",
         group="root",
         mode="644",
-        config={"domain_name": domain},
+        config={"domain_name": config.mail_domain},
     )
     need_restart |= mta_sts_config.changed
 
@@ -464,6 +454,7 @@ def deploy_chatmail(config_path: Path) -> None:
 
     server.group(name="Create vmail group", group="vmail", system=True)
     server.user(name="Create vmail user", user="vmail", group="vmail", system=True)
+    server.user(name="Create filtermail user", user="filtermail", system=True)
     server.group(name="Create opendkim group", group="opendkim", system=True)
     server.user(
         name="Create opendkim user",
@@ -478,11 +469,6 @@ def deploy_chatmail(config_path: Path) -> None:
         system=True,
     )
     server.user(name="Create echobot user", user="echobot", system=True)
-
-    server.shell(
-        name="Fix file owner in /home/vmail",
-        commands=["test -d /home/vmail && chown -R vmail:vmail /home/vmail"],
-    )
 
     # Add our OBS repository for dovecot_no_delay
     files.put(
@@ -548,12 +534,12 @@ def deploy_chatmail(config_path: Path) -> None:
 
     apt.packages(
         name="Install Dovecot",
-        packages=["dovecot-imapd", "dovecot-lmtpd", "dovecot-sieve"],
+        packages=["dovecot-imapd", "dovecot-lmtpd"],
     )
 
     apt.packages(
         name="Install nginx",
-        packages=["nginx"],
+        packages=["nginx", "libnginx-mod-stream"],
     )
 
     apt.packages(
@@ -573,7 +559,7 @@ def deploy_chatmail(config_path: Path) -> None:
     dovecot_need_restart = _configure_dovecot(config, debug=debug)
     postfix_need_restart = _configure_postfix(config, debug=debug)
     mta_sts_need_restart = _install_mta_sts_daemon()
-    nginx_need_restart = _configure_nginx(mail_domain)
+    nginx_need_restart = _configure_nginx(config)
 
     _remove_rspamd()
     opendkim_need_restart = _configure_opendkim(mail_domain, "opendkim")
@@ -649,5 +635,3 @@ def deploy_chatmail(config_path: Path) -> None:
         name="Ensure cron is installed",
         packages=["cron"],
     )
-
-

@@ -8,15 +8,18 @@ from pathlib import Path
 
 import pytest
 from chatmaild.config import read_config, write_initial_config
-from chatmaild.database import Database
 
 
 @pytest.fixture
 def make_config(tmp_path):
     inipath = tmp_path.joinpath("chatmail.ini")
 
-    def make_conf(mail_domain):
-        write_initial_config(inipath, mail_domain=mail_domain)
+    def make_conf(mail_domain, settings=None):
+        basedir = tmp_path.joinpath(f"vmail/{mail_domain}")
+        basedir.mkdir(parents=True, exist_ok=True)
+        overrides = settings.copy() if settings else {}
+        overrides["mailboxes_dir"] = str(basedir)
+        write_initial_config(inipath, mail_domain, overrides=overrides)
         return read_config(inipath)
 
     return make_conf
@@ -30,6 +33,11 @@ def example_config(make_config):
 @pytest.fixture
 def maildomain(example_config):
     return example_config.mail_domain
+
+
+@pytest.fixture
+def testaddr(maildomain):
+    return f"user.name@{maildomain}"
 
 
 @pytest.fixture
@@ -50,13 +58,6 @@ def gencreds(maildomain):
     return lambda domain=None: next(gen(domain))
 
 
-@pytest.fixture()
-def db(tmpdir):
-    db_path = tmpdir / "passdb.sqlite"
-    print("database path:", db_path)
-    return Database(db_path)
-
-
 @pytest.fixture
 def maildata(request):
     try:
@@ -67,9 +68,30 @@ def maildata(request):
 
     assert datadir.exists(), datadir
 
-    def maildata(name, from_addr, to_addr):
-        data = datadir.joinpath(name).read_text()
-        text = data.format(from_addr=from_addr, to_addr=to_addr)
+    def maildata(name, from_addr, to_addr, subject="..."):
+        # Using `.read_bytes().decode()` instead of `.read_text()` to preserve newlines.
+        data = datadir.joinpath(name).read_bytes().decode()
+
+        text = data.format(from_addr=from_addr, to_addr=to_addr, subject=subject)
         return BytesParser(policy=policy.default).parsebytes(text.encode())
 
     return maildata
+
+
+@pytest.fixture
+def mockout():
+    class MockOut:
+        captured_red = []
+        captured_green = []
+        captured_plain = []
+
+        def red(self, msg):
+            self.captured_red.append(msg)
+
+        def green(self, msg):
+            self.captured_green.append(msg)
+
+        def __call__(self, msg):
+            self.captured_plain.append(msg)
+
+    return MockOut()

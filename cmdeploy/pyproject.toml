@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "cmdeploy"
 version = "0.2"
 dependencies = [
-  "pyinfra",
+  "pyinfra>=3",
   "pillow",
   "qrcode",
   "markdown",
@@ -18,6 +18,7 @@ dependencies = [
   "ruff",
   "pytest",
   "pytest-xdist", 
+  "execnet",
   "imap_tools",
 ]
 

@@ -2,6 +2,107 @@
 
 ## untagged
 
+
+## 1.4.1 2024-07-31
+
+- fix metadata dictproxy which would confuse transactions
+  resulting in missed notifications and other issues. 
+  ([#393](https://github.com/deltachat/chatmail/pull/388))
+  ([#394](https://github.com/deltachat/chatmail/pull/389))
+
+- add optional "imap_rawlog" config option. If true, 
+  .in/.out files are created in user home dirs 
+  containing the imap protocol messages. 
+  ([#389](https://github.com/deltachat/chatmail/pull/389))
+
+## 1.4.0 2024-07-28
+
+- Add `disable_ipv6` config option to chatmail.ini.
+  Required if the server doesn't have IPv6 connectivity.
+  ([#312](https://github.com/deltachat/chatmail/pull/312))
+
+- allow current K9/Thunderbird-mail releases to send encrypted messages
+  outside by accepting their localized "encrypted subject" strings. 
+  ([#370](https://github.com/deltachat/chatmail/pull/370))
+
+- Migrate and remove sqlite database in favor of password/lastlogin tracking 
+  in a user's maildir.  
+  ([#379](https://github.com/deltachat/chatmail/pull/379))
+
+- Require pyinfra V3 installed on the client side,
+  run `./scripts/initenv.sh` to upgrade locally.
+  ([#378](https://github.com/deltachat/chatmail/pull/378))
+
+- don't hardcode "/home/vmail" paths but rather set them 
+  once in the config object and use it everywhere else, 
+  thereby also improving testability.  
+  ([#351](https://github.com/deltachat/chatmail/pull/351))
+  temporarily introduced obligatory "passdb_path" and "mailboxes_dir" 
+  settings but they were removed/obsoleted in 
+  ([#380](https://github.com/deltachat/chatmail/pull/380))
+
+- BREAKING: new required chatmail.ini value 'delete_inactive_users_after = 100'
+  which removes users from database and mails after 100 days without any login. 
+  ([#350](https://github.com/deltachat/chatmail/pull/350))
+
+- Refine DNS checking to distinguish between "required" and "recommended" settings 
+  ([#372](https://github.com/deltachat/chatmail/pull/372))
+
+- reload nginx in the acmetool cronjob
+  ([#360](https://github.com/deltachat/chatmail/pull/360))
+
+- remove checking of reverse-DNS PTR records.  Chatmail-servers don't
+  depend on it and even in the wider e-mail system it's not common anymore. 
+  If it's an issue, a chatmail operator can still care to properly set reverse DNS. 
+  ([#348](https://github.com/deltachat/chatmail/pull/348))
+
+- Make DNS-checking faster and more interactive, run it fully during "cmdeploy run",
+  also introducing a generic mechanism for rapid remote ssh-based python function execution. 
+  ([#346](https://github.com/deltachat/chatmail/pull/346))
+
+- Don't fix file owner ship of /home/vmail 
+  ([#345](https://github.com/deltachat/chatmail/pull/345))
+
+- Support iterating over all users with doveadm commands 
+  ([#344](https://github.com/deltachat/chatmail/pull/344))
+
+- Test and fix for attempts to create inadmissible accounts 
+  ([#333](https://github.com/deltachat/chatmail/pull/321))
+
+- check that OpenPGP has only PKESK, SKESK and SEIPD packets
+  ([#323](https://github.com/deltachat/chatmail/pull/323),
+   [#324](https://github.com/deltachat/chatmail/pull/324))
+
+- improve filtermail checks for encrypted messages and drop support for unencrypted MDNs
+  ([#320](https://github.com/deltachat/chatmail/pull/320))
+
+- replace `bash` with `/bin/sh`
+  ([#334](https://github.com/deltachat/chatmail/pull/334))
+
+- Increase number of logged in IMAP sessions to 50000
+  ([#335](https://github.com/deltachat/chatmail/pull/335))
+
+- filtermail: do not allow ASCII armor without actual payload
+  ([#325](https://github.com/deltachat/chatmail/pull/325))
+
+- Remove sieve to enable hardlink deduplication in LMTP
+  ([#343](https://github.com/deltachat/chatmail/pull/343))
+
+- dovecot: enable gzip compression on disk
+  ([#341](https://github.com/deltachat/chatmail/pull/341))
+
+- DKIM-sign Content-Type and oversign all signed headers
+  ([#296](https://github.com/deltachat/chatmail/pull/296))
+
+- Add nonci_accounts metric
+  ([#347](https://github.com/deltachat/chatmail/pull/347))
+
+- doveauth: log when a new account is created
+  ([#349](https://github.com/deltachat/chatmail/pull/349))
+
+- Multiplex HTTPS, IMAP and SMTP on port 443
+  ([#357](https://github.com/deltachat/chatmail/pull/357))
+
 ## 1.3.0 - 2024-06-06
 
 - don't check necessary DNS records on cmdeploy init anymore

@@ -8,11 +8,11 @@ import logging
 import os
 import subprocess
 import sys
-from pathlib import Path
 
 from deltachat_rpc_client import Bot, DeltaChat, EventType, Rpc, events
 
-from chatmaild.config import read_config
+from chatmaild.config import echobot_password_path, read_config
+from chatmaild.doveauth import encrypt_password
 from chatmaild.newemail import create_newemail_dict
 
 hooks = events.HookCollection()
@@ -21,9 +21,9 @@ hooks = events.HookCollection()
 @hooks.on(events.RawEvent)
 def log_event(event):
     if event.kind == EventType.INFO:
-        logging.info("%s", event.msg)
+        logging.info(event.msg)
     elif event.kind == EventType.WARNING:
-        logging.warning("%s", event.msg)
+        logging.warning(event.msg)
 
 
 @hooks.on(events.RawEvent(EventType.ERROR))
@@ -45,7 +45,7 @@ def on_group_image_changed(event):
 
 @hooks.on(events.GroupNameChanged)
 def on_group_name_changed(event):
-    logging.info("group name changed, old name: %s", event.old_name)
+    logging.info(f"group name changed, old name: {event.old_name}")
 
 
 @hooks.on(events.NewMessage(func=lambda e: not e.command))
@@ -72,7 +72,7 @@ def main():
     with Rpc() as rpc:
         deltachat = DeltaChat(rpc)
         system_info = deltachat.get_system_info()
-        logging.info("Running deltachat core %s", system_info.deltachat_core_version)
+        logging.info(f"Running deltachat core {system_info.deltachat_core_version}")
 
         accounts = deltachat.get_all_accounts()
         account = accounts[0] if accounts else deltachat.add_account()
@@ -80,23 +80,23 @@ def main():
         bot = Bot(account, hooks)
 
         config = read_config(sys.argv[1])
+        addr = "echo@" + config.mail_domain
 
         # Create password file
         if bot.is_configured():
             password = bot.account.get_config("mail_pw")
         else:
             password = create_newemail_dict(config)["password"]
-        Path("/run/echobot/password").write_text(password)
 
+        echobot_password_path.write_text(encrypt_password(password))
         # Give the user which doveauth runs as access to the password file.
-        subprocess.run(
-            ["/usr/bin/setfacl", "-m", "user:vmail:r", "/run/echobot/password"],
-            check=True,
+        subprocess.check_call(
+            ["/usr/bin/setfacl", "-m", "user:vmail:r", echobot_password_path],
         )
 
         if not bot.is_configured():
-            email = "echo@" + config.mail_domain
-            bot.configure(email, password)
+            bot.configure(addr, password)
+
         bot.run_forever()
 
 

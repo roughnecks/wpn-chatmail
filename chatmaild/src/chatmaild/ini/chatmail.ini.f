@@ -8,17 +8,23 @@ mail_domain = {mail_domain}
 #
 
 #
-# Account Restrictions
+# Restrictions on user addresses
 #
 
 # how many mails a user can send out per minute
 max_user_send_per_minute = 60
 
-# maximum mailbox size of a chatmail account
+# maximum mailbox size of a chatmail address
 max_mailbox_size = 100M
+
+# maximum message size for an e-mail in bytes
+max_message_size = 31457280
 
 # days after which mails are unconditionally deleted
 delete_mails_after = 20
+
+# days after which users without a login are deleted (database and mails)
+delete_inactive_users_after = 100
 
 # minimum length a username must have
 username_min_length = 9
@@ -29,7 +35,7 @@ username_max_length = 9
 # minimum length a password must have
 password_min_length = 9
 
-# list of chatmail accounts which can send outbound un-encrypted mail
+# list of chatmail addresses which can send outbound un-encrypted mail
 passthrough_senders =
 
 # list of e-mail recipients for which to accept outbound un-encrypted mails
@@ -44,6 +50,20 @@ filtermail_smtp_port = 10080
 
 # postfix accepts on the localhost reinject SMTP port
 postfix_reinject_port = 10025
+
+# if set to "True" IPv6 is disabled
+disable_ipv6 = False
+
+#
+# Debugging options 
+#
+
+# set to True if you want to track imap protocol execution
+# in per-maildir ".in/.out" files. 
+# Note that you need to manually cleanup these files
+# so use this option with caution on production servers. 
+imap_rawlog = false 
+
 
 #
 # Privacy Policy
@@ -60,4 +80,3 @@ privacy_pdo =
 
 # postal address of the privacy supervisor
 privacy_supervisor =
-

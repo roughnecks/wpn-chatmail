@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import asyncio
+import base64
+import binascii
 import logging
 import sys
 import time
@@ -10,56 +12,133 @@ from smtplib import SMTP as SMTPClient
 
 from aiosmtpd.controller import Controller
 
+from .common_encrypted_subjects import common_encrypted_subjects
 from .config import read_config
 
 
+def check_openpgp_payload(payload: bytes):
+    """Checks the OpenPGP payload.
+
+    OpenPGP payload must consist only of PKESK and SKESK packets
+    terminated by a single SEIPD packet.
+
+    Returns True if OpenPGP payload is correct,
+    False otherwise.
+
+    May raise IndexError while trying to read OpenPGP packet header
+    if it is truncated.
+    """
+    i = 0
+    while i < len(payload):
+        # Only OpenPGP format is allowed.
+        if payload[i] & 0xC0 != 0xC0:
+            return False
+
+        packet_type_id = payload[i] & 0x3F
+        i += 1
+        if payload[i] < 192:
+            # One-octet length.
+            body_len = payload[i]
+            i += 1
+        elif payload[i] < 224:
+            # Two-octet length.
+            body_len = ((payload[i] - 192) << 8) + payload[i + 1] + 192
+            i += 2
+        elif payload[i] == 255:
+            # Five-octet length.
+            body_len = (
+                (payload[i + 1] << 24)
+                | (payload[i + 2] << 16)
+                | (payload[i + 3] << 8)
+                | payload[i + 4]
+            )
+            i += 5
+        else:
+            # Partial body length is not allowed.
+            return False
+
+        i += body_len
+
+        if i == len(payload):
+            if packet_type_id == 18:
+                # Last packet should be
+                # Symmetrically Encrypted and Integrity Protected Data Packet (SEIPD)
+                return True
+        elif packet_type_id not in [1, 3]:
+            # All packets except the last one must be either
+            # Public-Key Encrypted Session Key Packet (PKESK)
+            # or
+            # Symmetric-Key Encrypted Session Key Packet (SKESK)
+            return False
+
+    if i == 0:
+        return False
+
+    if i > len(payload):
+        # Payload is truncated.
+        return False
+    return True
+
+
+def check_armored_payload(payload: str):
+    prefix = "-----BEGIN PGP MESSAGE-----\r\n\r\n"
+    if not payload.startswith(prefix):
+        return False
+    payload = payload.removeprefix(prefix)
+
+    suffix = "-----END PGP MESSAGE-----\r\n\r\n"
+    if not payload.endswith(suffix):
+        return False
+    payload = payload.removesuffix(suffix)
+
+    # Remove CRC24.
+    payload = payload.rpartition("=")[0]
+
+    try:
+        payload = base64.b64decode(payload)
+    except binascii.Error:
+        return False
+
+    try:
+        return check_openpgp_payload(payload)
+    except IndexError:
+        return False
+
+
 def check_encrypted(message):
-    """Check that the message is an OpenPGP-encrypted message."""
+    """Check that the message is an OpenPGP-encrypted message.
+
+    MIME structure of the message must correspond to <https://www.rfc-editor.org/rfc/rfc3156>.
+    """
     if not message.is_multipart():
         return False
-    if message.get("subject") != "...":
+    if message.get("subject") not in common_encrypted_subjects:
         return False
     if message.get_content_type() != "multipart/encrypted":
         return False
     parts_count = 0
     for part in message.iter_parts():
+        # We explicitly check Content-Type of each part later,
+        # but this is to be absolutely sure `get_payload()` returns string and not list.
+        if part.is_multipart():
+            return False
+
         if parts_count == 0:
             if part.get_content_type() != "application/pgp-encrypted":
+                return False
+
+            payload = part.get_payload()
+            if payload.strip() != "Version: 1":
                 return False
         elif parts_count == 1:
             if part.get_content_type() != "application/octet-stream":
                 return False
+
+            if not check_armored_payload(part.get_payload()):
+                return False
         else:
             return False
         parts_count += 1
-    return True
-
-
-def check_mdn(message, envelope):
-    if len(envelope.rcpt_tos) != 1:
-        return False
-
-    for name in ["auto-submitted", "chat-version"]:
-        if not message.get(name):
-            return False
-
-    if message.get_content_type() != "multipart/report":
-        return False
-
-    body = message.get_body()
-    if body.get_content_type() != "text/plain":
-        return False
-
-    if list(body.iter_attachments()) or list(body.iter_parts()):
-        return False
-
-    # even with all mime-structural checks an attacker
-    # could try to abuse the subject or body to contain links or other
-    # annoyance -- we skip on checking subject/body for now as Delta Chat
-    # should evolve to create E2E-encrypted read receipts anyway.
-    # and then MDNs are just encrypted mail and can pass the border
-    # to other instances.
-
     return True
 
 
@@ -107,9 +186,6 @@ class BeforeQueueHandler:
         logging.info(f"mime-from: {from_addr} envelope-from: {envelope.mail_from!r}")
         if envelope.mail_from.lower() != from_addr.lower():
             return f"500 Invalid FROM <{from_addr!r}> for <{envelope.mail_from!r}>"
-
-        if not mail_encrypted and check_mdn(message, envelope):
-            return
 
         if envelope.mail_from in self.config.passthrough_senders:
             return

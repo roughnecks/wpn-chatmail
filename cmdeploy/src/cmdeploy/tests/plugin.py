@@ -10,7 +10,6 @@ from pathlib import Path
 
 import pytest
 from chatmaild.config import read_config
-from chatmaild.database import Database
 
 conftestdir = Path(__file__).parent
 
@@ -35,7 +34,7 @@ def pytest_runtest_setup(item):
             pytest.skip("skipping slow test, use --slow to run")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def chatmail_config(pytestconfig):
     current = basedir = Path().resolve()
     while 1:
@@ -49,12 +48,12 @@ def chatmail_config(pytestconfig):
     pytest.skip(f"no chatmail.ini file found in {basedir} or parent dirs")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def maildomain(chatmail_config):
     return chatmail_config.mail_domain
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def sshdomain(maildomain):
     return os.environ.get("CHATMAIL_SSH", maildomain)
 
@@ -77,6 +76,17 @@ def pytest_report_header():
     if domain:
         text = f"chatmail test instance: {domain}"
         return ["-" * len(text), text, "-" * len(text)]
+
+
+@pytest.fixture
+def cm_data(request):
+    datadir = request.fspath.dirpath("data")
+
+    class CMData:
+        def get(self, name):
+            return datadir.join(name).read()
+
+    return CMData()
 
 
 @pytest.fixture
@@ -249,13 +259,6 @@ def gencreds(chatmail_config):
             yield f"{user}@{domain}", f"{password}"
 
     return lambda domain=None: next(gen(domain))
-
-
-@pytest.fixture()
-def db(tmpdir):
-    db_path = tmpdir / "passdb.sqlite"
-    print("database path:", db_path)
-    return Database(db_path)
 
 
 #

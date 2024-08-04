@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from contextlib import contextmanager
+from random import randint
 
 import filelock
 
@@ -32,5 +33,12 @@ class FileDict:
         except FileNotFoundError:
             return {}
         except Exception:
-            logging.warning("corrupt serialization state at: %r", self.path)
+            logging.warning(f"corrupt serialization state at: {self.path!r}")
             return {}
+
+
+def write_bytes_atomic(path, content):
+    rint = randint(0, 10000000)
+    tmp = path.with_name(path.name + f".tmp-{rint}")
+    tmp.write_bytes(content)
+    os.rename(tmp, path)
