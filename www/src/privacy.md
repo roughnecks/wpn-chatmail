@@ -2,10 +2,13 @@
 # Informativa sulla riservatezza per {{ config.mail_domain }}
 
 {% if config.mail_domain == "nine.testrun.org" %}
-Benvenuto in `{{config.mail_domain}}`, il server d'imbarco Chatmail italiano per gli utenti Delta Chat.
-È gestito da un piccolo team di volontari raggiungibili all'indirizzo: chatmail@woodpeckersnest.space
-{% endif %}
 
+Benvenuti su `{{config.mail_domain}}`, il server di imbarco per chatmail per gli utenti di Delta Chat.
+È gestito da un piccolo team di sysops
+su base volontaria.
+Consulta [altri server di chatmail](https://delta.chat/en/chatmail) per operatori di server alternativi.
+
+{% endif %}
 
 ## Riepilogo: nessun dato personale richiesto o raccolto
 
@@ -21,18 +24,22 @@ Un server di chatmail si comporta più come il server di messaggistica Signal
 ma non conosce i numeri di telefono e interopera in modo sicuro e automatico
 con altri chatmail e server di posta elettronica classici.
 
-In particolare, questo server di Chatmail
+
+A differenza dei classici server di posta elettronica, questo server di chatmail
 
 - rimuove incondizionatamente i messaggi dopo {{ config.delete_mails_after }} giorni,
 
 - vieta l'invio di messaggi non crittografati,
 
-- contiene solo file di registro temporanei utilizzati per scopi di debug.
+- non memorizza indirizzi Internet ("indirizzi IP"),
 
-Legalmente, le autorità potrebbero ancora considerare la Chatmail come un "classico server e-mail".
-che raccoglie e conserva i dati personali.
-Non siamo d'accordo su questa interpretazione. Tuttavia, forniamo ulteriori dettagli legali di seguito
-per semplificare la vita agli specialisti della protezione dei dati e agli avvocati che controllano le operazioni di Chatmail.
+- non elabora indirizzi IP in relazione agli indirizzi e-mail.
+
+A causa della conseguente mancanza di elaborazione di dati personali,
+questo server di chatmail potrebbe non richiedere un'informativa sulla privacy.
+
+Tuttavia, forniamo di seguito dettagli legali per semplificare la vita
+agli specialisti della protezione dei dati e agli avvocati che esaminano le operazioni di chatmail.
 
 
 ## 1. Nome e informazioni di contatto
@@ -52,19 +59,19 @@ Abbiamo nominato un responsabile della protezione dei dati:
 
 ##2. Trattamento in caso di utilizzo dei servizi e-mail in chat
 
-Forniamo servizi e-mail ottimizzati per l'uso dall'app [Delta Chat](https://delta.chat).
-ed elaborare solo i dati necessari
-per l'impostazione e l'esecuzione tecnica dell'invio di e-mail.
-Lo scopo del trattamento è quello di
-leggere, scrivere, gestire, eliminare, inviare e ricevere e-mail.
-Per questo scopo,
-gestiamo software lato server
-che ci consente di inviare e ricevere messaggi e-mail.
-Consentire l'utilizzo del servizio e-mail,
-trattiamo i seguenti dati e dettagli:
+Forniamo servizi ottimizzati per l'uso da app [Delta Chat](https://delta.chat)
+ed elaboriamo solo i dati necessari
+per la configurazione e l'esecuzione tecnica della consegna dei messaggi.
+Lo scopo dell'elaborazione è che gli utenti possano
+leggere, scrivere, gestire, eliminare, inviare e ricevere messaggi di chat.
+A questo scopo,
+utilizziamo software lato server
+che ci consente di inviare e ricevere messaggi.
+
+Elaboriamo i seguenti dati e dettagli:
 
 - I messaggi in uscita e in entrata (SMTP) vengono archiviati per il transito
- per conto dei loro utenti fino a quando il messaggio non può essere recapitato.
+per conto dei loro utenti fino a quando il messaggio non può essere consegnato.
 
 - I messaggi e-mail vengono archiviati per il destinatario e resi accessibili tramite protocolli IMAP,
  fino alla cancellazione esplicita da parte dell'utente o fino al superamento di un periodo di tempo stabilito,
@@ -72,10 +79,15 @@ trattiamo i seguenti dati e dettagli:
 
 - I protocolli IMAP e SMTP sono protetti da password con credenziali univoche per ciascun account.
 
-- Gli utenti possono recuperare o eliminare tutti i messaggi memorizzati
- senza intervento da parte degli operatori che utilizzano strumenti client IMAP standard.
+- Gli utenti possono recuperare o eliminare tutti i messaggi archiviati
+senza l'intervento degli operatori utilizzando gli strumenti client IMAP standard.
 
-### 3.1 Configurazione dell'account
+- Gli utenti possono connettersi a un "servizio di inoltro in tempo reale"
+per stabilire una connessione Peer-to-Peer tra i dispositivi degli utenti,
+che consente loro di inviare e recuperare messaggi effimeri
+che non vengono mai archiviati sul server di chatmail, anche non in forma crittografata.
+
+### 2.1 Configurazione dell'account
 
 La creazione di un account avviene in due modi sui nostri server di posta:
 
@@ -247,12 +259,16 @@ o la nostra sede legale a questo scopo.
 L’autorità di vigilanza competente per la nostra sede di attività
 è il `{{ config.privacy_supervisor }}`.
 
-
 ## 6. Validità della presente informativa sulla privacy
+
+La presente dichiarazione sulla protezione dei dati è valida
+a partire da *ottobre 2024*.
+A causa dell'ulteriore sviluppo del nostro servizio e delle nostre offerte
+o a causa di modifiche dei requisiti legali o ufficiali,
+potrebbe rendersi necessario rivedere di tanto in tanto la presente dichiarazione sulla protezione dei dati.
 
 La presente dichiarazione sulla protezione dei dati è valida
 a partire da *Maggio 2024*.
 A causa dell'ulteriore sviluppo del nostro servizio e delle nostre offerte
 o a causa di modifiche dei requisiti legali o ufficiali,
 potrebbe essere necessario rivedere di tanto in tanto la presente dichiarazione sulla protezione dei dati.
-
