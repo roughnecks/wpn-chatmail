@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 from chatmaild.config import Config, read_config
-from pyinfra import host
+from pyinfra import host, facts
 from pyinfra.facts.files import File
 from pyinfra.facts.systemd import SystemdEnabled
 from pyinfra.operations import apt, files, pip, server, systemd
@@ -441,10 +441,105 @@ def check_config(config):
     return config
 
 
-def deploy_chatmail(config_path: Path) -> None:
+def deploy_mtail(config):
+    apt.packages(
+        name="Install mtail",
+        packages=["mtail"],
+    )
+
+    # Using our own systemd unit instead of `/usr/lib/systemd/system/mtail.service`.
+    # This allows to read from journalctl instead of log files.
+    files.template(
+        src=importlib.resources.files(__package__).joinpath("mtail/mtail.service.j2"),
+        dest="/etc/systemd/system/mtail.service",
+        user="root",
+        group="root",
+        mode="644",
+        address=config.mtail_address or "127.0.0.1",
+        port=3903,
+    )
+
+    mtail_conf = files.put(
+        name="Mtail configuration",
+        src=importlib.resources.files(__package__).joinpath(
+            "mtail/delivered_mail.mtail"
+        ),
+        dest="/etc/mtail/delivered_mail.mtail",
+        user="root",
+        group="root",
+        mode="644",
+    )
+
+    systemd.service(
+        name="Start and enable mtail",
+        service="mtail.service",
+        running=bool(config.mtail_address),
+        enabled=bool(config.mtail_address),
+        restarted=mtail_conf.changed,
+    )
+
+
+def deploy_iroh_relay(config) -> None:
+    (url, sha256sum) = {
+        "x86_64": (
+            "https://github.com/n0-computer/iroh/releases/download/v0.28.1/iroh-relay-v0.28.1-x86_64-unknown-linux-musl.tar.gz",
+            "2ffacf7c0622c26b67a5895ee8e07388769599f60e5f52a3bd40a3258db89b2c",
+        ),
+        "aarch64": (
+            "https://github.com/n0-computer/iroh/releases/download/v0.28.1/iroh-relay-v0.28.1-aarch64-unknown-linux-musl.tar.gz",
+            "b915037bcc1ff1110cc9fcb5de4a17c00ff576fd2f568cd339b3b2d54c420dc4",
+        ),
+    }[host.get_fact(facts.server.Arch)]
+
+    apt.packages(
+        name="Install curl",
+        packages=["curl"],
+    )
+
+    server.shell(
+        name="Download iroh-relay",
+        commands=[
+            f"(echo '{sha256sum} /usr/local/bin/iroh-relay' | sha256sum -c) || (curl -L {url} | gunzip | tar -x -f - ./iroh-relay -O >/usr/local/bin/iroh-relay.new && mv /usr/local/bin/iroh-relay.new /usr/local/bin/iroh-relay)",
+            "chmod 755 /usr/local/bin/iroh-relay",
+        ],
+    )
+
+    need_restart = False
+
+    systemd_unit = files.put(
+        name="Upload iroh-relay systemd unit",
+        src=importlib.resources.files(__package__).joinpath("iroh-relay.service"),
+        dest="/etc/systemd/system/iroh-relay.service",
+        user="root",
+        group="root",
+        mode="644",
+    )
+    need_restart |= systemd_unit.changed
+
+    iroh_config = files.put(
+        name=f"Upload iroh-relay config",
+        src=importlib.resources.files(__package__).joinpath("iroh-relay.toml"),
+        dest=f"/etc/iroh-relay.toml",
+        user="root",
+        group="root",
+        mode="644",
+    )
+    need_restart |= iroh_config.changed
+
+    systemd.service(
+        name="Start and enable iroh-relay",
+        service="iroh-relay.service",
+        running=True,
+        enabled=config.enable_iroh_relay,
+        restarted=need_restart,
+    )
+
+
+def deploy_chatmail(config_path: Path, disable_mail: bool) -> None:
     """Deploy a chat-mail instance.
 
     :param config_path: path to chatmail.ini
+    :param disable_mail: whether to disable postfix & dovecot
     """
     config = read_config(config_path)
     check_config(config)
@@ -469,6 +564,7 @@ def deploy_chatmail(config_path: Path) -> None:
         system=True,
     )
     server.user(name="Create echobot user", user="echobot", system=True)
+    server.user(name="Create iroh user", user="iroh", system=True)
 
     # Add our OBS repository for dovecot_no_delay
     files.put(
@@ -489,6 +585,7 @@ def deploy_chatmail(config_path: Path) -> None:
     )
 
     apt.update(name="apt update", cache_time=24 * 3600)
+    apt.upgrade(name="upgrade apt packages", auto_remove=True)
 
     apt.packages(
         name="Install rsync",
@@ -516,9 +613,12 @@ def deploy_chatmail(config_path: Path) -> None:
         enabled=True,
     )
 
+    deploy_iroh_relay(config)
+
     # Deploy acmetool to have TLS certificates.
+    tls_domains = [mail_domain, f"mta-sts.{mail_domain}", f"www.{mail_domain}"]
     deploy_acmetool(
-        domains=[mail_domain, f"mta-sts.{mail_domain}", f"www.{mail_domain}"],
+        domains=tls_domains,
     )
 
     apt.packages(
@@ -585,19 +685,19 @@ def deploy_chatmail(config_path: Path) -> None:
     # because it creates authentication socket
     # required by Postfix.
     systemd.service(
-        name="Start and enable Dovecot",
+        name="disable dovecot for now" if disable_mail else "Start and enable Dovecot",
         service="dovecot.service",
-        running=True,
-        enabled=True,
-        restarted=dovecot_need_restart,
+        running=False if disable_mail else True,
+        enabled=False if disable_mail else True,
+        restarted=dovecot_need_restart if not disable_mail else False,
     )
 
     systemd.service(
-        name="Start and enable Postfix",
+        name="disable postfix for now" if disable_mail else "Start and enable Postfix",
         service="postfix.service",
-        running=True,
-        enabled=True,
-        restarted=postfix_need_restart,
+        running=False if disable_mail else True,
+        enabled=False if disable_mail else True,
+        restarted=postfix_need_restart if not disable_mail else False,
     )
 
     systemd.service(
@@ -635,3 +735,5 @@ def deploy_chatmail(config_path: Path) -> None:
         name="Ensure cron is installed",
         packages=["cron"],
     )
+
+    deploy_mtail(config)

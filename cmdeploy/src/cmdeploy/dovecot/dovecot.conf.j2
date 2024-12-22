@@ -51,10 +51,7 @@ mail_server_comment = Chatmail server
 # <https://doc.dovecot.org/configuration_manual/quota_plugin/>
 mail_plugins = zlib quota
 
-# these are the capabilities Delta Chat cares about actually 
-# so let's keep the network overhead per login small
-# https://github.com/deltachat/deltachat-core-rust/blob/master/src/imap/capabilities.rs
-imap_capability = IMAP4rev1 IDLE MOVE QUOTA CONDSTORE NOTIFY METADATA XDELTAPUSH XCHATMAIL
+imap_capability = +XDELTAPUSH XCHATMAIL
 
 
 # Authentication for system users.
@@ -144,7 +141,7 @@ plugin {
   # for now we define static quota-rules for all users 
   quota = maildir:User quota
   quota_rule = *:storage={{ config.max_mailbox_size }}
-  quota_max_mail_size=30M
+  quota_max_mail_size={{ config.max_message_size }}
   quota_grace = 0
   # quota_over_flag_value = TRUE
 }
@@ -195,6 +192,17 @@ service imap-login {
 
     # Avoid startup latency for new connections.
     process_min_avail = 10
+}
+
+service anvil {
+    # We are disabling anvil penalty on failed login attempts
+    # because it can only detect brute forcing by IP address
+    # not by username. As the correct IP address is not handed
+    # to dovecot anyway, it is more of hindrance than of use.
+    # See <https://www.dovecot.org/list/dovecot/2012-May/135485.html> for details.
+    unix_listener anvil-auth-penalty {
+        mode = 0
+    }
 }
 
 ssl = required

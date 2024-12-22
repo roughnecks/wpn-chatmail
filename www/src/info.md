@@ -40,6 +40,19 @@ consente ai tuoi messaggi di passare liberamente a qualsiasi destinatario estern
 
 - Puoi archiviare fino a [{{ config.max_mailbox_size }} messaggi sul server](https://delta.chat/it/help#what-happens-if-i-turn-on-delete-old-messages-from-server).
 
+Eliminazione account
+
+Se rimuovi un profilo {{ config.mail_domain }} dall'app Delta Chat,
+allora l'account corrispondente sul server, insieme a tutti i dati associati,
+viene automaticamente eliminato {{ config.delete_inactive_users_after }} giorni dopo.
+
+Se utilizzi più dispositivi
+allora devi rimuovere il profilo chat corrispondente da ogni dispositivo
+affinché tutti i dati dell'account vengano rimossi sul lato server.
+
+Se hai ulteriori domande o richieste riguardanti l'eliminazione dell'account
+invia un messaggio dal tuo account a {{ config.privacy_mail }}.
+
 ### Chi sono gli operatori? Quale software è in esecuzione?
 
 Questo provider di chatmail è gestito da un piccolo gruppo volontario di sviluppatori e amministratori di sistema,

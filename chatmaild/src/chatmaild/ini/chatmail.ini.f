@@ -23,8 +23,8 @@ max_message_size = 31457280
 # days after which mails are unconditionally deleted
 delete_mails_after = 20
 
-# days after which users without a login are deleted (database and mails)
-delete_inactive_users_after = 100
+# days after which users without a successful login are deleted (database and mails)
+delete_inactive_users_after = 90
 
 # minimum length a username must have
 username_min_length = 9
@@ -39,7 +39,8 @@ password_min_length = 9
 passthrough_senders =
 
 # list of e-mail recipients for which to accept outbound un-encrypted mails
-passthrough_recipients = xstore@testrun.org groupsbot@hispanilandia.net
+# (space-separated, item may start with "@" to whitelist whole recipient domains)
+passthrough_recipients = xstore@testrun.org 
 
 #
 # Deployment Details
@@ -53,6 +54,29 @@ postfix_reinject_port = 10025
 
 # if set to "True" IPv6 is disabled
 disable_ipv6 = False
+
+# Defaults to https://iroh.{{mail_domain}} and running `iroh-relay` on the chatmail
+# service.
+# If you set it to anything else, the service will be disabled
+# and users will be directed to use the given iroh relay URL.
+# Set it to empty string if you want users to use their default iroh relay.
+# iroh_relay =
+
+# Address on which `mtail` listens,
+# e.g. 127.0.0.1 or some private network
+# address like 192.168.10.1.
+# You can point Prometheus
+# or some other OpenMetrics-compatible
+# collector to
+# http://{{mtail_address}}:3903/metrics
+# and display collected metrics with Grafana.
+#
+# WARNING: do not expose this service
+# to the public IP address.
+#
+# `mtail is not running if the setting is not set.
+
+# mtail_address = 127.0.0.1
 
 #
 # Debugging options 

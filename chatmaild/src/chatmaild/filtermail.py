@@ -60,10 +60,11 @@ def check_openpgp_payload(payload: bytes):
         i += body_len
 
         if i == len(payload):
-            if packet_type_id == 18:
-                # Last packet should be
-                # Symmetrically Encrypted and Integrity Protected Data Packet (SEIPD)
-                return True
+            # Last packet should be
+            # Symmetrically Encrypted and Integrity Protected Data Packet (SEIPD)
+            #
+            # This is the only place where this function may return `True`.
+            return packet_type_id == 18
         elif packet_type_id not in [1, 3]:
             # All packets except the last one must be either
             # Public-Key Encrypted Session Key Packet (PKESK)
@@ -71,13 +72,7 @@ def check_openpgp_payload(payload: bytes):
             # Symmetric-Key Encrypted Session Key Packet (SKESK)
             return False
 
-    if i == 0:
-        return False
-
-    if i > len(payload):
-        # Payload is truncated.
-        return False
-    return True
+    return False
 
 
 def check_armored_payload(payload: str):
@@ -147,6 +142,15 @@ async def asyncmain_beforequeue(config):
     Controller(BeforeQueueHandler(config), hostname="127.0.0.1", port=port).start()
 
 
+def recipient_matches_passthrough(recipient, passthrough_recipients):
+    for addr in passthrough_recipients:
+        if recipient == addr:
+            return True
+        if addr[0] == "@" and recipient.endswith(addr):
+            return True
+    return False
+
+
 class BeforeQueueHandler:
     def __init__(self, config):
         self.config = config
@@ -183,20 +187,34 @@ class BeforeQueueHandler:
         mail_encrypted = check_encrypted(message)
 
         _, from_addr = parseaddr(message.get("from").strip())
+        envelope_from_domain = from_addr.split("@").pop()
+
         logging.info(f"mime-from: {from_addr} envelope-from: {envelope.mail_from!r}")
         if envelope.mail_from.lower() != from_addr.lower():
             return f"500 Invalid FROM <{from_addr!r}> for <{envelope.mail_from!r}>"
+
+        if mail_encrypted:
+            print("Filtering encrypted mail.", file=sys.stderr)
+        else:
+            print("Filtering unencrypted mail.", file=sys.stderr)
 
         if envelope.mail_from in self.config.passthrough_senders:
             return
 
         passthrough_recipients = self.config.passthrough_recipients
-        envelope_from_domain = from_addr.split("@").pop()
+
+        is_securejoin = message.get("secure-join") in [
+            "vc-request",
+            "vg-request",
+        ]
+        if is_securejoin:
+            return
+
         for recipient in envelope.rcpt_tos:
             if envelope.mail_from == recipient:
                 # Always allow sending emails to self.
                 continue
-            if recipient in passthrough_recipients:
+            if recipient_matches_passthrough(recipient, passthrough_recipients):
                 continue
             res = recipient.split("@")
             if len(res) != 2:
@@ -205,12 +223,8 @@ class BeforeQueueHandler:
 
             is_outgoing = recipient_domain != envelope_from_domain
             if is_outgoing and not mail_encrypted:
-                is_securejoin = message.get("secure-join") in [
-                    "vc-request",
-                    "vg-request",
-                ]
-                if not is_securejoin:
-                    return f"500 Invalid unencrypted mail to <{recipient}>"
+                print("Rejected unencrypted mail.", file=sys.stderr)
+                return f"500 Invalid unencrypted mail to <{recipient}>"
 
 
 class SendRateLimiter:

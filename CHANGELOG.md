@@ -2,13 +2,87 @@
 
 ## untagged
 
+## 1.5.0 2024-12-20
+
+- cmdeploy dns: always show recommended DNS records
+  ([#463](https://github.com/deltachat/chatmail/pull/463))
+
+- add `--all` to `cmdeploy dns`
+  ([#462](https://github.com/deltachat/chatmail/pull/462))
+
+- fix `_mta-sts` TXT DNS record
+  ([#461](https://github.com/deltachat/chatmail/pull/461)
+
+- deploy `iroh-relay` and also update "realtime relay services" in privacy policy. 
+  ([#434](https://github.com/deltachat/chatmail/pull/434))
+  ([#451](https://github.com/deltachat/chatmail/pull/451))
+
+- add guide to migrate chatmail to a new server
+  ([#429](https://github.com/deltachat/chatmail/pull/429))
+
+- disable anvil authentication penalty
+  ([#414](https://github.com/deltachat/chatmail/pull/444)
+
+- increase `request_queue_size` for UNIX sockets to 1000.
+  ([#437](https://github.com/deltachat/chatmail/pull/437))
+
+- add argument to `cmdeploy run` for specifying
+  a different SSH host than `mail_domain`
+  ([#439](https://github.com/deltachat/chatmail/pull/439))
+
+- query autoritative nameserver to bypass DNS cache
+  ([#424](https://github.com/deltachat/chatmail/pull/424))
+
+- add mtail support (new optional `mtail_address` ini value)
+  This defines the address on which [`mtail`](https://google.github.io/mtail/)
+  exposes its metrics collected from the logs.
+  If you want to collect the metrics with Prometheus,
+  setup a private network (e.g. WireGuard interface)
+  and assign an IP address from this network to the host.
+  If you do not plan to collect metrics,
+  keep this setting unset.
+  ([#388](https://github.com/deltachat/chatmail/pull/388))
+
+- fix checking for required DNS records
+  ([#412](https://github.com/deltachat/chatmail/pull/412))
+
+- add support for specifying whole domains for recipient passthrough list
+  ([#408](https://github.com/deltachat/chatmail/pull/408))
+
+- add a paragraph about "account deletion" to info page 
+  ([#405](https://github.com/deltachat/chatmail/pull/405))
+
+- avoid nginx listening on ipv6 if v6 is dsiabled 
+  ([#402](https://github.com/deltachat/chatmail/pull/402))
+
+- refactor ssh-based execution to allow organizing remote functions in
+  modules. 
+  ([#396](https://github.com/deltachat/chatmail/pull/396))
+
+- trigger "apt upgrade" during "cmdeploy run" 
+  ([#398](https://github.com/deltachat/chatmail/pull/398))
+
+- drop hispanilandia passthrough address
+  ([#401](https://github.com/deltachat/chatmail/pull/401))
+
+- set CAA record flags to 0
+
+- add IMAP capabilities instead of overwriting them
+  ([#413](https://github.com/deltachat/chatmail/pull/413))
+
+- fix OpenPGP payload check
+  ([#435](https://github.com/deltachat/chatmail/pull/435))
+
+- fix Dovecot quota_max_mail_size to use max_message_size config value
+  ([#438](https://github.com/deltachat/chatmail/pull/438))
+
 
 ## 1.4.1 2024-07-31
 
 - fix metadata dictproxy which would confuse transactions
   resulting in missed notifications and other issues. 
-  ([#393](https://github.com/deltachat/chatmail/pull/388))
-  ([#394](https://github.com/deltachat/chatmail/pull/389))
+  ([#393](https://github.com/deltachat/chatmail/pull/393))
+  ([#394](https://github.com/deltachat/chatmail/pull/394))
 
 - add optional "imap_rawlog" config option. If true, 
   .in/.out files are created in user home dirs 
