@@ -1,65 +1,61 @@
 
-## More information 
+## Ulteriori informazioni
 
-{{ config.mail_domain }} provides a low-maintenance, resource efficient and 
-interoperable e-mail service for everyone. What's behind a `chatmail` is 
-effectively a normal e-mail address just like any other but optimized 
-for the usage in chats, especially DeltaChat.
+{{ config.mail_domain }} fornisce un servizio e-mai interoperabile, a bassa manutenzione e a basso consumo di risorse per tutti. Ciò che sta dietro una `chatmail` è
+in pratica un normale indirizzo di posta elettronica come qualsiasi altro, ma ottimizzato
+per l'utilizzo nelle chat, in particolare Delta Chat.
 
-### Choosing a chatmail address instead of using a random one
+### Scegliere un indirizzo di chatmail anziché usarne uno casuale
 
-In the Delta Chat account setup you may tap `Create a profile` then `Use other server` and choose `Classic e-mail login`. Here fill the two fields like this: 
+Nella configurazione dell'account Delta Chat puoi toccare `Crea Profilo`, quindi `Usa Altro Server` e scegliere `Accesso E-mail Classico`. Qui compila i due campi in questo modo:
 
-- `E-Mail Address`: invent a word with
+- `Indirizzo e-mail`: inventa una parola con
 {% if username_min_length == username_max_length %}
-  *exactly* {{ username_min_length }}
+*esattamente* {{ username_min_length }}
 {% else %}
-  {{ username_min_length}}
-  {% if username_max_length == "more" %}
-    or more
-  {% else %}
-    to {{ username_max_length }}
-  {% endif %}
+{{ username_min_length}}
+{% if username_max_length == "more" %}
+o più
+{% else %}
+a {{ username_max_length }}
 {% endif %}
-  characters
-  and append `@{{config.mail_domain}}` to it.
+{% endif %}
+caratteri
+e aggiungi `@{{config.mail_domain}}`.
 
-- `Existing Password`: invent at least {{ password_min_length }} characters.
+- `Password esistente`: ​​inventa almeno {{ password_min_length }} caratteri.
 
-If the e-mail address is not yet taken, you'll get that account. 
-The first login sets your password. 
+Se l'indirizzo e-mail non è ancora stato preso, otterrai quell'account.
+Il primo accesso imposta la tua password.
 
+### Limiti di velocità e archiviazione
 
-### Rate and storage limits 
+- I messaggi non crittografati sono bloccati per i destinatari esterni a
+{{config.mail_domain}}, ma l'impostazione del contatto tramite [codici di invito QR](https://delta.chat/it/help#howtoe2ee)
+consente ai tuoi messaggi di passare liberamente a qualsiasi destinatario esterno.
 
-- Un-encrypted messages are blocked to recipients outside
-  {{config.mail_domain}} but setting up contact via [QR invite codes](https://delta.chat/en/help#howtoe2ee) 
-  allows your messages to pass freely to any outside recipients.
+- Puoi inviare fino a {{ config.max_user_send_per_minute }} messaggi al minuto.
 
-- You may send up to {{ config.max_user_send_per_minute }} messages per minute.
+- I messaggi vengono rimossi incondizionatamente {{ config.delete_mails_after }} giorni dopo l'arrivo sul server.
 
-- Messages are unconditionally removed {{ config.delete_mails_after }} days after arriving on the server.
+- Puoi archiviare fino a [{{ config.max_mailbox_size }} messaggi sul server](https://delta.chat/it/help#what-happens-if-i-turn-on-delete-old-messages-from-server).
 
-- You can store up to [{{ config.max_mailbox_size }} messages on the server](https://delta.chat/en/help#what-happens-if-i-turn-on-delete-old-messages-from-server).
+Eliminazione account
 
+Se rimuovi un profilo {{ config.mail_domain }} dall'app Delta Chat,
+allora l'account corrispondente sul server, insieme a tutti i dati associati,
+viene automaticamente eliminato {{ config.delete_inactive_users_after }} giorni dopo.
 
-### <a name="account-deletion"></a> Account deletion 
+Se utilizzi più dispositivi
+allora devi rimuovere il profilo chat corrispondente da ogni dispositivo
+affinché tutti i dati dell'account vengano rimossi sul lato server.
 
-If you remove a {{ config.mail_domain }} profile from within the Delta Chat app, 
-then the according account on the server, along with all associated data,
-is automatically deleted {{ config.delete_inactive_users_after }} days afterwards. 
+Se hai ulteriori domande o richieste riguardanti l'eliminazione dell'account
+invia un messaggio dal tuo account a {{ config.privacy_mail }}.
 
-If you use multiple devices 
-then you need to remove the according chat profile from each device
-in order for all account data to be removed on the server side. 
+### Chi sono gli operatori? Quale software è in esecuzione?
 
-If you have any further questions or requests regarding account deletion
-please send a message from your account to {{ config.privacy_mail }}. 
-
-
-### Who are the operators? Which software is running? 
-
-This chatmail provider is run by a small voluntary group of devs and sysadmins,
-who [publically develop chatmail provider setups](https://github.com/deltachat/chatmail).
-Chatmail setups aim to be very low-maintenance, resource efficient and 
-interoperable with any other standards-compliant e-mail service. 
+Questo provider di chatmail è gestito da un piccolo gruppo volontario di sviluppatori e amministratori di sistema,
+che [sviluppano pubblicamente configurazioni di provider chatmail](https://github.com/deltachat/chatmail).
+Le configurazioni di chatmail mirano a essere a bassissima manutenzione, efficienti in termini di risorse e
+interoperabili con qualsiasi altro servizio e-mail conforme agli standard.
